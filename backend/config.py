@@ -21,10 +21,13 @@ class Config:
 
     CATEGORIES = ["Notes", "Assignments", "Important Questions", "Previous Year Papers"]
 
-    # Edit this list to match your actual BCA subjects
+    # Edit this list to match actual BCA subjects
     SUBJECTS = [
-        "Python", "PHP", "Data Structures", "Database Management",
-        "UML/OOP Concepts", "Mathematics", "Web Development",
+        "Digital System",
+        "Mathematics for Data Science",
+        "Design and Thinking",
+        "Multimedia Technology",
+        "Data Structure",
     ]
 
     SEMESTERS = ["1", "2", "3", "4", "5", "6"]
