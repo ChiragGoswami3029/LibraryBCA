@@ -11,6 +11,8 @@ class Config:
     # Secret key used to sign login tokens (JWT). Change this before deploying!
     JWT_SECRET_KEY = "change-this-to-a-random-secret-string"
 
+    JWT_ACCESS_TOKEN_EXPIRES = False # stay logged in until you log out.
+    
     # Where uploaded assignment files are physically stored
     UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
 

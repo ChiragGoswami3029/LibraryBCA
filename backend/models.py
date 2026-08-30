@@ -52,8 +52,8 @@ class FileItem(db.Model):
             "original_name": self.original_name,
             "uploader": self.uploader.name,  # type: ignore
             "uploader_id": self.uploader_id,
-            "upload_date": self.upload_date.strftime("%Y-%m-%d %H:%M"),  # type: ignore
-            "comment_count": len(self.comments),
+            "upload_date": self.upload_date.isoformat()  ,
+            "comment_count": len(self.comments)  # type: ignore[reportArgumentType]
         }
 
 
@@ -73,7 +73,7 @@ class Comment(db.Model):
             "file_id": self.file_id,
             "author": self.author.name,  # type: ignore
             "author_id": self.author_id,
-            "created_at": self.created_at.strftime("%Y-%m-%d %H:%M"),  # type: ignore
+            "created_at": self.created_at.isoformat() ,  # type: ignore
         }
 
 
@@ -104,5 +104,5 @@ class Notification(db.Model):
             "file_id": self.file_id,
             "message": self.message,
             "is_read": self.is_read,
-            "created_at": self.created_at.strftime("%Y-%m-%d %H:%M"),  # type: ignore
+            "created_at": self.created_at.isoformat() ,  # type: ignore
         }

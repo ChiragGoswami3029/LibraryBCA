@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from models import db, User
 
 auth_bp = Blueprint("auth", __name__)
@@ -38,3 +38,15 @@ def login():
     # Create a token — like a library card the frontend keeps and shows for future requests
     token = create_access_token(identity=str(user.id))
     return jsonify({"token": token, "name": user.name}), 200
+
+@auth_bp.route("/profile", methods=["GET"])
+@jwt_required()
+def get_profile():
+    user_id = int(get_jwt_identity())
+    user = User.query.get_or_404(user_id)
+    return jsonify({
+        "id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "created_at": user.created_at.isoformat(),
+    }), 200
