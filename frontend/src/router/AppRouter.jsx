@@ -64,54 +64,24 @@ export default function AppRouter() {
         element={isAuthenticated ? <Navigate to="/app/dashboard" replace /> : <Signup />}
       />
 
-      <Route path="/app" element={<AppShell />}>
+      <Route
+        path="/app"
+        element={
+          <ProtectedRoute>
+            <AppShell />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<Navigate to="/app/dashboard" replace />} />
-
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="browse" element={<Browse />} />
         <Route path="files/:fileId" element={<FileDetails />} />
+        <Route path="upload" element={<Upload />} />
+        <Route path="my-uploads" element={<MyUploads />} />
+        <Route path="notifications" element={<Notifications />} />
+        <Route path="followed-subjects" element={<FollowedSubjects />} />
+        <Route path="profile" element={<Profile />} />
         <Route path="settings" element={<Settings />} />
-
-        <Route
-          path="upload"
-          element={
-            <ProtectedRoute>
-              <Upload />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="my-uploads"
-          element={
-            <ProtectedRoute>
-              <MyUploads />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="notifications"
-          element={
-            <ProtectedRoute>
-              <Notifications />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="followed-subjects"
-          element={
-            <ProtectedRoute>
-              <FollowedSubjects />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
       </Route>
 
       <Route path="*" element={<NotFound />} />

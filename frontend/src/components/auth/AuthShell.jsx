@@ -45,7 +45,7 @@ export default function AuthShell({ children, title, subtitle }) {
           {/* Brand */}
           <div>
             <Link
-              to="/app/dashboard"
+              to="/"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
