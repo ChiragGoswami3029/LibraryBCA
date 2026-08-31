@@ -38,10 +38,12 @@ export default function SignupForm() {
         navigate('/login');
       }, 1500);
     } catch (err) {
-      if (err.status === 409) {
+      if (err?.status === 409) {
         setErrorMessage('Email is already registered. Please log in instead.');
+      } else if (err?.status === 0) {
+        setErrorMessage('Unable to connect to the server. Please make sure the backend is running and try again.');
       } else {
-        setErrorMessage(err.message || 'Registration failed. Please try again.');
+        setErrorMessage(err?.message || 'Unable to create your account. Please check your details and try again.');
       }
     } finally {
       setIsLoading(false);

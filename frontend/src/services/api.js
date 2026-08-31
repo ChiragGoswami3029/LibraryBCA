@@ -73,12 +73,13 @@ export async function apiRequest(endpoint, options = {}) {
     if (error instanceof ApiError) {
       throw error;
     }
-    // Network errors or offline
-    throw new ApiError(
-      error.message || 'Unable to connect to server. Please check your network.',
-      0,
-      null
-    );
+
+    const message =
+      error instanceof TypeError
+        ? 'Unable to connect to the server. Please make sure the backend is running and try again.'
+        : error.message || 'Unable to connect to the server. Please check your network.';
+
+    throw new ApiError(message, 0, null);
   }
 }
 

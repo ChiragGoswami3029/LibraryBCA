@@ -18,8 +18,18 @@ def create_app():
     # Make sure the uploads folder actually exists
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
+    frontend_origins = [
+        os.getenv("FRONTEND_ORIGIN"),
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ]
+
     # Allow the frontend (on a different domain) to talk to this backend
-    CORS(app)
+    CORS(
+        app,
+        resources={r"/*": {"origins": [origin for origin in frontend_origins if origin]}},
+        supports_credentials=True,
+    )
 
     db.init_app(app)
     JWTManager(app)

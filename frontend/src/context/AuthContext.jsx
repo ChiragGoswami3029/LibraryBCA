@@ -14,6 +14,7 @@ export function AuthProvider({ children }) {
     }
   });
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+  const [isAuthReady, setIsAuthReady] = useState(false);
 
   // Helper to persist auth data
   const handleAuthSuccess = (newToken, name, id = null) => {
@@ -54,7 +55,9 @@ export function AuthProvider({ children }) {
   // Sync profile on mount if token exists
   useEffect(() => {
     if (token) {
-      refreshProfile();
+      refreshProfile().finally(() => setIsAuthReady(true));
+    } else {
+      setIsAuthReady(true);
     }
   }, [token, refreshProfile]);
 
@@ -103,6 +106,7 @@ export function AuthProvider({ children }) {
         token,
         user,
         isAuthenticated,
+        isAuthReady,
         isLoadingProfile,
         login,
         signup,

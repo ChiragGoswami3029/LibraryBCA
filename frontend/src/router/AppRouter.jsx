@@ -15,11 +15,20 @@ import Profile from '../pages/Profile';
 import Settings from '../pages/Settings';
 import Login from '../pages/Login';
 import Signup from '../pages/Signup';
+import Home from '../pages/Home';
+import NotFound from '../pages/NotFound';
 
-// Protected Route Guard
 function ProtectedRoute({ children }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isAuthReady } = useAuth();
   const location = useLocation();
+
+  if (!isAuthReady) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', color: 'var(--text-primary)' }}>
+        Checking your session...
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
@@ -29,26 +38,40 @@ function ProtectedRoute({ children }) {
 }
 
 export default function AppRouter() {
+  const { isAuthenticated, isAuthReady } = useAuth();
+
+  if (!isAuthReady) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', color: 'var(--text-primary)' }}>
+        Loading AcademicShare...
+      </div>
+    );
+  }
+
   return (
     <Routes>
-      {/* Root redirect to Dashboard */}
-      <Route path="/" element={<Navigate to="/app/dashboard" replace />} />
+      <Route
+        path="/"
+        element={isAuthenticated ? <Navigate to="/app/dashboard" replace /> : <Home />}
+      />
 
-      {/* Standalone Auth Routes (without application sidebar/topbar) */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
+      <Route
+        path="/login"
+        element={isAuthenticated ? <Navigate to="/app/dashboard" replace /> : <Login />}
+      />
+      <Route
+        path="/signup"
+        element={isAuthenticated ? <Navigate to="/app/dashboard" replace /> : <Signup />}
+      />
 
-      {/* Main App Layout */}
       <Route path="/app" element={<AppShell />}>
         <Route index element={<Navigate to="/app/dashboard" replace />} />
-        
-        {/* Public Application Routes */}
+
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="browse" element={<Browse />} />
         <Route path="files/:fileId" element={<FileDetails />} />
         <Route path="settings" element={<Settings />} />
 
-        {/* Protected Application Routes */}
         <Route
           path="upload"
           element={
@@ -91,8 +114,7 @@ export default function AppRouter() {
         />
       </Route>
 
-      {/* Catch-all fallback */}
-      <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
