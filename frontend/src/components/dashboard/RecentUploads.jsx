@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Clock, ArrowRight } from 'lucide-react';
 import { getFiles } from '../../services/filesApi';
 import FileList from '../files/FileList';
 import { useAuth } from '../../context/AuthContext';
 
-export default function RecentUploads() {
+export default function RecentUploads({
+  semester = '',
+  subject = '',
+  searchQuery = '',
+  sort = 'newest',
+}) {
   const [files, setFiles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,9 +19,14 @@ export default function RecentUploads() {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await getFiles({ sort: 'newest' });
-      // Take first 5 recent files
-      setFiles(Array.isArray(data) ? data.slice(0, 6) : []);
+      const data = await getFiles({
+        semester,
+        subject,
+        q: searchQuery,
+        sort,
+      });
+      // Show up to 8 recent files
+      setFiles(Array.isArray(data) ? data.slice(0, 8) : []);
     } catch (err) {
       setError(err);
     } finally {
@@ -27,44 +36,51 @@ export default function RecentUploads() {
 
   useEffect(() => {
     loadRecentFiles();
-  }, []);
+  }, [semester, subject, searchQuery, sort]);
 
   return (
-    <section style={{ marginTop: '1.75rem' }}>
+    <section
+      className="glass-panel"
+      style={{
+        padding: '1.5rem',
+        borderRadius: '24px',
+        background: 'var(--surface-card)',
+        border: '1px solid var(--border-glass)',
+        boxShadow: 'var(--shadow-glass)',
+      }}
+    >
+      {/* Section Header matching Screenshot */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: '1rem',
+          marginBottom: '1.25rem',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Clock size={18} style={{ color: 'var(--accent-primary)' }} />
-          <h2 style={{ fontSize: '1.15rem', fontWeight: 700 }}>Recent Uploads</h2>
-        </div>
+        <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+          Recent Uploads
+        </h2>
         <Link
           to="/app/browse"
           style={{
-            fontSize: '0.85rem',
+            fontSize: '0.825rem',
             fontWeight: 600,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '4px',
+            color: 'var(--text-secondary)',
           }}
         >
-          <span>View all resources</span>
-          <ArrowRight size={14} />
+          View all
         </Link>
       </div>
 
+      {/* Resource Rows List */}
       <FileList
         files={files}
         isLoading={isLoading}
         error={error}
         onRetry={loadRecentFiles}
-        emptyTitle="No recent uploads"
-        emptyDescription="Be the first to share notes or assignments for your class!"
+        emptyTitle="No recent uploads found"
+        emptyDescription="Be the first to share notes or assignments for this semester!"
         currentUserId={user?.id}
       />
     </section>

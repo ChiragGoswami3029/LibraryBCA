@@ -1,8 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UploadCloud, Plus } from 'lucide-react';
+import { UploadCloud, Upload } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import Button from '../common/Button';
 
 export default function QuickUpload() {
   const navigate = useNavigate();
@@ -12,47 +11,67 @@ export default function QuickUpload() {
     <div
       className="glass-panel"
       style={{
-        padding: '1.25rem',
+        padding: '1.4rem',
+        borderRadius: '20px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '0.85rem',
-        background: 'linear-gradient(145deg, var(--surface-glass) 0%, rgba(102, 155, 188, 0.12) 100%)',
-        border: '1px solid var(--border-glass-strong)',
+        gap: '1.15rem',
+        background: 'var(--surface-card)',
+        border: '1px solid var(--border-glass)',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      {/* Top row: Caramel Upload Icon Box + Text */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
         <div
           style={{
-            width: 36,
-            height: 36,
-            borderRadius: 'var(--radius-md)',
-            background: 'var(--accent-subtle)',
-            color: 'var(--accent-primary)',
+            width: 46,
+            height: 46,
+            borderRadius: '14px',
+            background: 'linear-gradient(135deg, #8C5535 0%, #A26842 100%)',
+            color: '#ffffff',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            boxShadow: '0 4px 12px rgba(140, 85, 53, 0.35)',
+            flexShrink: 0,
           }}
         >
-          <UploadCloud size={20} />
+          <UploadCloud size={24} />
         </div>
+
         <div>
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 700 }}>Share Resource</h3>
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Help your BCA coursemates</p>
+          <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.2 }}>
+            Quick Upload
+          </h3>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px', lineHeight: 1.3 }}>
+            Share your notes with
+            <br />
+            your classmates.
+          </p>
         </div>
       </div>
 
-      <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-        Upload lecture notes, solved assignments, question banks, or past exam papers.
-      </p>
-
-      <Button
-        variant="primary"
-        size="sm"
-        icon={Plus}
+      {/* Button: Upload Files */}
+      <button
+        type="button"
         onClick={() => navigate(isAuthenticated ? '/app/upload' : '/login')}
+        className="btn"
+        style={{
+          width: '100%',
+          padding: '9px 16px',
+          fontSize: '0.825rem',
+          fontWeight: 700,
+          borderRadius: '12px',
+          background: 'linear-gradient(135deg, #8C5535 0%, #A26842 100%)',
+          color: '#FFFFFF',
+          border: '1px solid rgba(235, 175, 130, 0.3)',
+          boxShadow: '0 4px 12px rgba(140, 85, 53, 0.3)',
+          gap: '8px',
+        }}
       >
-        {isAuthenticated ? 'Upload Now' : 'Log in to Upload'}
-      </Button>
+        <Upload size={15} />
+        <span>Upload Files</span>
+      </button>
     </div>
   );
 }

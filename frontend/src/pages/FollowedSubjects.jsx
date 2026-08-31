@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookmarkCheck, BookOpen, Check, Plus, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
+import { BookOpen, Check, Plus, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { getMyFollows, followSubject, unfollowSubject } from '../services/followApi';
 import { getMeta } from '../services/metaApi';
 import Skeleton from '../components/common/Skeleton';

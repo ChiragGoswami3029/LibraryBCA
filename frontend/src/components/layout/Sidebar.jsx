@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -10,21 +10,42 @@ import {
   User,
   Settings,
   GraduationCap,
-  LogOut,
-  LogIn,
+  Upload,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { getNotifications } from '../../services/followApi';
 
 export default function Sidebar({ isOpen, onClose }) {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setUnreadCount(0);
+      return;
+    }
+    let isMounted = true;
+    getNotifications()
+      .then((items) => {
+        if (isMounted && Array.isArray(items)) {
+          const unread = items.filter((n) => !n.is_read).length;
+          setUnreadCount(unread);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isAuthenticated]);
 
   const navItems = [
     { label: 'Dashboard', path: '/app/dashboard', icon: LayoutDashboard },
     { label: 'Browse', path: '/app/browse', icon: Compass },
     { label: 'Upload', path: '/app/upload', icon: UploadCloud, requiresAuth: true },
     { label: 'My Uploads', path: '/app/my-uploads', icon: FolderHeart, requiresAuth: true },
-    { label: 'Notifications', path: '/app/notifications', icon: Bell, requiresAuth: true },
+    { label: 'Notifications', path: '/app/notifications', icon: Bell, requiresAuth: true, badge: unreadCount },
     { label: 'Followed Subjects', path: '/app/followed-subjects', icon: BookmarkCheck, requiresAuth: true },
     { label: 'Profile', path: '/app/profile', icon: User, requiresAuth: true },
     { label: 'Settings', path: '/app/settings', icon: Settings },
@@ -38,7 +59,7 @@ export default function Sidebar({ isOpen, onClose }) {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(1, 20, 32, 0.65)',
+            background: 'rgba(10, 8, 7, 0.65)',
             backdropFilter: 'blur(4px)',
             zIndex: 90,
           }}
@@ -48,7 +69,7 @@ export default function Sidebar({ isOpen, onClose }) {
       )}
 
       <aside
-        className={`sidebar glass-panel-strong ${isOpen ? 'sidebar-open' : ''}`}
+        className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}
         style={{
           width: 'var(--sidebar-width)',
           height: '100vh',
@@ -58,56 +79,56 @@ export default function Sidebar({ isOpen, onClose }) {
           flexDirection: 'column',
           zIndex: 100,
           borderRadius: 0,
-          borderLeft: 'none',
-          borderTop: 'none',
-          borderBottom: 'none',
-          borderRight: '1px solid var(--border-glass)',
-          background: 'var(--surface-modal)',
+          borderRight: '1px solid var(--sidebar-border)',
+          background: 'var(--sidebar-bg)',
+          color: 'var(--sidebar-text)',
           flexShrink: 0,
+          overflowY: 'auto',
         }}
       >
         {/* Brand Header */}
         <div
           style={{
-            padding: '1.25rem 1.5rem',
+            padding: '1.5rem 1.4rem 1.25rem',
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
-            borderBottom: '1px solid var(--border-glass-subtle)',
           }}
         >
           <div
             style={{
-              width: 40,
-              height: 40,
-              borderRadius: 'var(--radius-md)',
-              background: 'linear-gradient(135deg, #669BBC 0%, #0a4066 100%)',
+              width: 38,
+              height: 38,
+              borderRadius: '10px',
+              background: 'linear-gradient(135deg, #8C5535 0%, #A26842 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: '#ffffff',
-              boxShadow: '0 4px 12px rgba(102, 155, 188, 0.35)',
+              boxShadow: '0 4px 12px rgba(140, 85, 53, 0.4)',
+              flexShrink: 0,
             }}
           >
             <GraduationCap size={22} />
           </div>
           <div>
-            <h1 style={{ fontSize: '1.1rem', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
-              Academic<span style={{ color: 'var(--accent-primary)' }}>Share</span>
+            <h1 style={{ fontSize: '1.05rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#FFFFFF', lineHeight: 1.2 }}>
+              AcademicShare
             </h1>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>BCA Knowledge Hub</p>
+            <p style={{ fontSize: '0.725rem', color: 'var(--sidebar-text-muted)', marginTop: '2px' }}>
+              Share. Learn. Grow.
+            </p>
           </div>
         </div>
 
         {/* Navigation Links */}
         <nav
           style={{
-            padding: '1.25rem 0.85rem',
+            padding: '0.75rem 1rem',
             display: 'flex',
             flexDirection: 'column',
             gap: '4px',
             flex: 1,
-            overflowY: 'auto',
           }}
         >
           {navItems.map((item) => {
@@ -118,91 +139,118 @@ export default function Sidebar({ isOpen, onClose }) {
                 to={item.path}
                 onClick={onClose}
                 className={({ isActive }) =>
-                  `nav-link ${isActive ? 'nav-link-active' : ''}`
+                  `sidebar-nav-item ${isActive ? 'sidebar-nav-item-active' : ''}`
                 }
                 style={({ isActive }) => ({
                   display: 'flex',
                   alignItems: 'center',
                   gap: '12px',
-                  padding: '10px 14px',
-                  borderRadius: 'var(--radius-md)',
-                  color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-                  background: isActive ? 'var(--accent-subtle)' : 'transparent',
-                  border: isActive ? '1px solid var(--accent-primary)' : '1px solid transparent',
+                  padding: '9px 14px',
+                  borderRadius: '12px',
+                  color: isActive ? 'var(--sidebar-nav-active-text)' : 'var(--sidebar-text-muted)',
+                  background: isActive ? 'var(--sidebar-nav-active-bg)' : 'transparent',
+                  border: isActive ? '1px solid var(--sidebar-nav-active-border)' : '1px solid transparent',
                   fontWeight: isActive ? 700 : 500,
-                  fontSize: '0.9rem',
+                  fontSize: '0.875rem',
                   transition: 'all var(--transition-fast)',
                   textDecoration: 'none',
+                  boxShadow: isActive ? '0 4px 14px rgba(140, 85, 53, 0.25)' : 'none',
                 })}
               >
-                <Icon size={18} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
+                <Icon size={18} style={{ opacity: 0.9, flexShrink: 0 }} />
                 <span>{item.label}</span>
+                {item.badge && item.badge > 0 ? (
+                  <span className="nav-badge-pill">{item.badge}</span>
+                ) : null}
               </NavLink>
             );
           })}
         </nav>
 
-        {/* User / Auth Footer */}
-        <div
-          style={{
-            padding: '1rem 1.25rem',
-            borderTop: '1px solid var(--border-glass-subtle)',
-            background: 'var(--surface-glass-subtle)',
-          }}
-        >
-          {isAuthenticated ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-                <div
-                  style={{
-                    width: 34,
-                    height: 34,
-                    borderRadius: 'var(--radius-full)',
-                    background: 'var(--accent-subtle)',
-                    border: '1px solid var(--accent-primary)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'var(--accent-primary)',
-                    fontWeight: 700,
-                    fontSize: '0.85rem',
-                    flexShrink: 0,
-                  }}
-                >
-                  {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-                </div>
-                <div style={{ minWidth: 0, overflow: 'hidden' }}>
-                  <p className="truncate" style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                    {user?.name || 'Logged in'}
-                  </p>
-                  <p style={{ fontSize: '0.725rem', color: 'var(--text-muted)' }}>Student</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  logout();
-                  navigate('/login');
-                }}
-                className="btn btn-ghost"
-                style={{ padding: '6px', borderRadius: 'var(--radius-sm)' }}
-                title="Log out"
-                aria-label="Log out"
-              >
-                <LogOut size={16} />
-              </button>
+        {/* Sidebar Promotional Card */}
+        <div style={{ padding: '0 1rem 1.25rem' }}>
+          <div
+            style={{
+              padding: '1.25rem 1rem',
+              borderRadius: '16px',
+              background: 'var(--sidebar-promo-bg)',
+              border: '1px solid var(--sidebar-promo-border)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center',
+              gap: '0.75rem',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            {/* 3D-styled Academic Illustration */}
+            <div
+              style={{
+                width: '64px',
+                height: '64px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Stack of books with mortarboard & plant */}
+                <ellipse cx="32" cy="56" rx="24" ry="4" fill="rgba(0,0,0,0.2)" />
+                {/* Book 1 (Bottom) */}
+                <path d="M14 46L32 52L50 46L32 40L14 46Z" fill="#C49B7B" />
+                <path d="M14 46L32 52V56L14 50V46Z" fill="#8C5535" />
+                <path d="M50 46L32 52V56L50 50V46Z" fill="#A86E49" />
+                {/* Book 2 (Middle) */}
+                <path d="M16 40L32 45L48 40L32 35L16 40Z" fill="#D8B598" />
+                <path d="M16 40L32 45V48L16 43V40Z" fill="#9E6742" />
+                <path d="M48 40L32 45V48L48 43V40Z" fill="#BD845C" />
+                {/* Book 3 (Top) */}
+                <path d="M18 34L32 39L46 34L32 29L18 34Z" fill="#E8D1BC" />
+                <path d="M18 34L32 39V42L18 37V34Z" fill="#A86E49" />
+                <path d="M46 34L32 39V42L46 37V34Z" fill="#C9946E" />
+                {/* Graduation Cap */}
+                <path d="M32 16L48 22L32 28L16 22L32 16Z" fill="#FFFFFF" opacity="0.95" />
+                <path d="M24 25V30C24 33 32 35 32 35C32 35 40 33 40 30V25" stroke="#FFFFFF" strokeWidth="1.5" fill="none" opacity="0.9" />
+                <path d="M45 23V31" stroke="#D8B598" strokeWidth="1.5" strokeLinecap="round" />
+                <circle cx="45" cy="32" r="1.5" fill="#D8B598" />
+              </svg>
             </div>
-          ) : (
+
+            <div>
+              <h4 style={{ fontSize: '0.875rem', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.3 }}>
+                Share knowledge,
+                <br />
+                grow together.
+              </h4>
+              <p style={{ fontSize: '0.725rem', color: 'var(--sidebar-text-muted)', marginTop: '4px', lineHeight: 1.35 }}>
+                Upload your notes and help
+                <br />
+                your classmates succeed.
+              </p>
+            </div>
+
             <button
               type="button"
-              onClick={() => navigate('/login')}
-              className="btn btn-primary"
-              style={{ width: '100%', fontSize: '0.85rem' }}
+              onClick={() => navigate(isAuthenticated ? '/app/upload' : '/login')}
+              className="btn"
+              style={{
+                width: '100%',
+                padding: '7px 12px',
+                fontSize: '0.775rem',
+                fontWeight: 700,
+                borderRadius: '10px',
+                background: 'linear-gradient(135deg, #8C5535 0%, #A26842 100%)',
+                color: '#FFFFFF',
+                border: '1px solid rgba(235, 175, 130, 0.3)',
+                boxShadow: '0 4px 12px rgba(140, 85, 53, 0.35)',
+                gap: '6px',
+              }}
             >
-              <LogIn size={16} />
-              <span>Log in / Sign up</span>
+              <Upload size={14} />
+              <span>Upload Now</span>
             </button>
-          )}
+          </div>
         </div>
       </aside>
     </>

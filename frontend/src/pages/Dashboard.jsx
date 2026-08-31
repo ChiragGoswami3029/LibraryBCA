@@ -1,146 +1,196 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Search, Compass, BookOpen } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getMeta } from '../services/metaApi';
 import CategoryCard from '../components/dashboard/CategoryCard';
+import FilterBar from '../components/dashboard/FilterBar';
 import RecentUploads from '../components/dashboard/RecentUploads';
-import QuickUpload from '../components/dashboard/QuickUpload';
 import NotificationPanel from '../components/dashboard/NotificationPanel';
 import FollowedSubjects from '../components/dashboard/FollowedSubjects';
+import QuickUpload from '../components/dashboard/QuickUpload';
 
 export default function Dashboard() {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [categories, setCategories] = useState([
-    'Notes',
-    'Assignments',
-    'Important Questions',
-    'Previous Year Papers',
-  ]);
-  const [quickQuery, setQuickQuery] = useState('');
+
+  // Dynamic Metadata from GET /meta
+  const [meta, setMeta] = useState({
+    categories: ['Notes', 'Assignments', 'Important Questions', 'Previous Year Papers'],
+    subjects: [],
+    semesters: [],
+  });
+
+  // Filter Bar state
+  const [semester, setSemester] = useState('');
+  const [subject, setSubject] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sort, setSort] = useState('newest');
 
   useEffect(() => {
     getMeta()
       .then((data) => {
-        if (data?.categories && Array.isArray(data.categories)) {
-          setCategories(data.categories);
+        if (data) {
+          setMeta({
+            categories: (data.categories && data.categories.length > 0) ? data.categories : ['Notes', 'Assignments', 'Important Questions', 'Previous Year Papers'],
+            subjects: data.subjects || [],
+            semesters: data.semesters || [],
+          });
         }
       })
-      .catch(() => {
-        // Fallback to standard 4 categories
-      });
+      .catch(() => {});
   }, []);
 
-  const handleQuickSearch = (e) => {
-    e.preventDefault();
-    if (quickQuery.trim()) {
-      navigate(`/app/browse?q=${encodeURIComponent(quickQuery.trim())}`);
-    } else {
-      navigate('/app/browse');
-    }
+  const handleFilterClick = () => {
+    navigate('/app/browse');
   };
 
+  const displayName = isAuthenticated && user?.name ? user.name : 'Chik';
+
   return (
-    <div className="desktop-grid-3col">
-      {/* Left / Center Main Content */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
-        {/* Welcome Banner */}
-        <section
-          className="glass-panel"
-          style={{
-            padding: '1.75rem 2rem',
-            position: 'relative',
-            overflow: 'hidden',
-            background: 'linear-gradient(135deg, var(--surface-glass) 0%, rgba(10, 47, 74, 0.4) 100%)',
-          }}
-        >
-          <div style={{ maxWidth: '640px', position: 'relative', zIndex: 2 }}>
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '4px 12px',
-                borderRadius: 'var(--radius-full)',
-                background: 'var(--accent-subtle)',
-                color: 'var(--accent-primary)',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                marginBottom: '0.75rem',
-                border: '1px solid var(--border-glass)',
-              }}
-            >
-              <Sparkles size={14} />
-              <span>BCA Academic Material Sharing Platform</span>
-            </div>
-
-            <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
-              Welcome{isAuthenticated && user?.name ? `, ${user.name}` : ' to AcademicShare'}
-            </h1>
-
-            <p style={{ fontSize: '0.925rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '1.25rem' }}>
-              Find class notes, lab assignments, semester exam papers, and question banks shared directly by your BCA coursemates.
-            </p>
-
-            {/* Quick Search inside Welcome Banner */}
-            <form onSubmit={handleQuickSearch} style={{ display: 'flex', gap: '8px', maxWidth: '480px' }}>
-              <div style={{ position: 'relative', flex: 1 }}>
-                <Search
-                  size={16}
-                  style={{
-                    position: 'absolute',
-                    left: '12px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    color: 'var(--text-muted)',
-                  }}
-                />
-                <input
-                  type="search"
-                  placeholder="Search by topic, subject, or filename..."
-                  value={quickQuery}
-                  onChange={(e) => setQuickQuery(e.target.value)}
-                  className="glass-input"
-                  style={{ paddingLeft: '36px', height: '42px', fontSize: '0.875rem' }}
-                />
-              </div>
-              <button type="submit" className="btn btn-primary" style={{ padding: '0 18px', height: '42px' }}>
-                Search
-              </button>
-            </form>
-          </div>
-        </section>
-
-        {/* 4 Category Cards */}
-        <section>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1rem' }}>
-            <BookOpen size={18} style={{ color: 'var(--accent-primary)' }} />
-            <h2 style={{ fontSize: '1.15rem', fontWeight: 700 }}>Browse by Category</h2>
-          </div>
-          <div
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      <div className="desktop-grid-3col">
+        {/* Left / Center Main Content */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', minWidth: 0 }}>
+          {/* Welcome Banner matching Screenshot */}
+          <section
+            className="glass-panel"
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-              gap: '1rem',
+              padding: '2rem 2.25rem',
+              position: 'relative',
+              overflow: 'hidden',
+              borderRadius: '24px',
+              background: 'var(--surface-card)',
+              border: '1px solid var(--border-glass)',
+              boxShadow: 'var(--shadow-glass-sm)',
             }}
           >
-            {categories.map((cat) => (
+            {/* Subtle decorative wave pattern in top right */}
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                width: '280px',
+                height: '100%',
+                opacity: 0.18,
+                pointerEvents: 'none',
+              }}
+            >
+              <svg width="280" height="140" viewBox="0 0 280 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 40C80 20 160 120 280 60V0H0V40Z" fill="url(#wave-grad)" />
+                <path d="M0 70C90 50 180 140 280 90V0H0V70Z" fill="url(#wave-grad)" opacity="0.6" />
+                <defs>
+                  <linearGradient id="wave-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#8C5535" />
+                    <stop offset="100%" stopColor="#D8B598" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+
+            <div style={{ position: 'relative', zIndex: 2, maxWidth: '580px' }}>
+              <h1
+                style={{
+                  fontSize: '1.75rem',
+                  fontWeight: 800,
+                  color: 'var(--text-primary)',
+                  letterSpacing: '-0.02em',
+                  marginBottom: '0.4rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                Welcome back, {displayName}! 👋
+              </h1>
+
+              <p
+                style={{
+                  fontSize: '0.925rem',
+                  color: 'var(--text-secondary)',
+                  lineHeight: 1.45,
+                }}
+              >
+                Find and share academic resources with your classmates.
+              </p>
+            </div>
+          </section>
+
+          {/* 4 Category Cards Grid matching Screenshot */}
+          <section
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+              gap: '1rem',
+            }}
+            className="category-grid"
+          >
+            {meta.categories.slice(0, 4).map((cat) => (
               <CategoryCard key={cat} category={cat} />
             ))}
-          </div>
-        </section>
+          </section>
 
-        {/* Live Recent Uploads Feed */}
-        <RecentUploads />
+          {/* Filter / Search Bar Section */}
+          <FilterBar
+            semester={semester}
+            setSemester={setSemester}
+            subject={subject}
+            setSubject={setSubject}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            sort={sort}
+            setSort={setSort}
+            semesters={meta.semesters}
+            subjects={meta.subjects}
+            onFilterClick={handleFilterClick}
+          />
+
+          {/* Live Recent Uploads List */}
+          <RecentUploads
+            semester={semester}
+            subject={subject}
+            searchQuery={searchQuery}
+            sort={sort}
+          />
+        </div>
+
+        {/* Right Rail (Desktop) */}
+        <aside style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: 'var(--right-rail-width)' }}>
+          <NotificationPanel />
+          <FollowedSubjects />
+          <QuickUpload />
+        </aside>
       </div>
 
-      {/* Right Rail (Desktop) */}
-      <aside style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-        <QuickUpload />
-        <NotificationPanel />
-        <FollowedSubjects />
-      </aside>
+      {/* App Footer matching Screenshot */}
+      <footer
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '1rem',
+          padding: '1.5rem 0.5rem 0.5rem',
+          fontSize: '0.8rem',
+          color: 'var(--text-muted)',
+          borderTop: '1px solid var(--border-glass-subtle)',
+          marginTop: '1rem',
+          flexWrap: 'wrap',
+        }}
+      >
+        <div>
+          &copy; {new Date().getFullYear()} AcademicShare. All rights reserved.
+        </div>
+        <div
+          style={{
+            color: 'var(--text-primary)',
+            fontWeight: 600,
+            textAlign: 'center',
+            letterSpacing: '0.02em',
+          }}
+        >
+          Made by : Chirag Goswami, BCA (3rd SEM)
+        </div>
+      </footer>
     </div>
   );
 }

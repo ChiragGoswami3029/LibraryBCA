@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   Download,
@@ -8,15 +8,10 @@ import {
   User,
   Calendar,
   FileText,
-  FileImage,
-  FileCode,
   FileArchive,
-  BookOpen,
-  Share2,
 } from 'lucide-react';
 import { getFiles, getViewUrl, getDownloadUrl } from '../services/filesApi';
 import CommentList from '../components/comments/CommentList';
-import Button from '../components/common/Button';
 import Skeleton from '../components/common/Skeleton';
 import ErrorState from '../components/common/ErrorState';
 
@@ -27,9 +22,7 @@ export default function FileDetails() {
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [previewError, setPreviewError] = useState(false);
-
-  const loadFileDetails = async () => {
+  const loadFileDetails = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -44,11 +37,11 @@ export default function FileDetails() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [fileId]);
 
   useEffect(() => {
     loadFileDetails();
-  }, [fileId]);
+  }, [loadFileDetails]);
 
   const formatDate = (isoString) => {
     if (!isoString) return '';

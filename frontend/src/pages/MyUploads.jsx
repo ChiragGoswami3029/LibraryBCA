@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FolderHeart, Plus, AlertCircle, Trash2, Pencil, CheckCircle2 } from 'lucide-react';
+import { FolderHeart, Plus, AlertCircle, Trash2 } from 'lucide-react';
 import { getMyFiles, updateFile, deleteFile } from '../services/filesApi';
 import { getMeta } from '../services/metaApi';
-import { useAuth } from '../context/AuthContext';
 import FileRow from '../components/files/FileRow';
 import Modal from '../components/common/Modal';
 import Dropdown from '../components/common/Dropdown';
@@ -13,7 +12,6 @@ import EmptyState from '../components/common/EmptyState';
 import ErrorState from '../components/common/ErrorState';
 
 export default function MyUploads() {
-  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [files, setFiles] = useState([]);

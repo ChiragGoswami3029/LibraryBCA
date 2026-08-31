@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Filter, SlidersHorizontal, RotateCcw, X } from 'lucide-react';
+import { Search, RotateCcw, X } from 'lucide-react';
 import { getFiles } from '../services/filesApi';
 import { getMeta } from '../services/metaApi';
 import FileList from '../components/files/FileList';
