@@ -44,9 +44,14 @@ def create_app():
     with app.app_context():
         db.create_all()  # creates database.db and tables if they don't exist yet
 
+    # --- TEST ROUTE ADDED HERE ---
+    @app.route('/')
+    def home():
+        return {"status": "success", "message": "Flask Backend is working perfectly on Render!"}
+
     return app
 
-
+    
 app = create_app()
 
 if __name__ == "__main__":
