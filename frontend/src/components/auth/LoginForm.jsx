@@ -27,7 +27,7 @@ export default function LoginForm() {
 
     setIsLoading(true);
     try {
-      await login(email.trim(), password);
+      await login(email.trim().toLowerCase(), password);
       navigate(from, { replace: true });
     } catch (err) {
       if (err.status === 401) {

@@ -32,7 +32,8 @@ export default function SignupForm() {
 
     setIsLoading(true);
     try {
-      const res = await signup(name.trim(), email.trim(), password);
+      const normalizedEmail = email.trim().toLowerCase();
+      const res = await signup(name.trim(), normalizedEmail, password);
       setSuccessMessage(res?.message || 'Account created. You can now log in.');
       setTimeout(() => {
         navigate('/login');
