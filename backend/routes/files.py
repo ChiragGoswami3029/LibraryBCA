@@ -54,16 +54,22 @@ def upload_file():
 
     original_name = secure_filename(file.filename)
 
+    # Extension nikal kar decide karein ki file raw document hai ya image
+    ext = os.path.splitext(original_name)[1].lower()
+    raw_extensions = [".pdf", ".doc", ".docx", ".ppt", ".pptx", ".zip", ".txt"]
+    resource_type = "raw" if ext in raw_extensions else "image"
+
     try:
-        # 1. Cloudinary par direct upload karein
+              # 1. Cloudinary par direct upload karein
         upload_result = cloudinary.uploader.upload(
             file,
-            resource_type="auto"  # PDF, images, docs sab automatically handle karega
+            resource_type=resource_type,
+            use_filename=True,
+            unique_filename=True
         )
-        
+
         # 2. Cloudinary secure public URL lein
         cloudinary_url = upload_result.get("secure_url")
-
         # 3. Database me URL save karein
         record = FileItem(
             title=title,         # type: ignore
