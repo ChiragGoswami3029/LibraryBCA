@@ -1,4 +1,5 @@
 import os
+import uuid
 import cloudinary
 import cloudinary.uploader
 from flask import Blueprint, request, jsonify, send_from_directory, current_app, redirect
@@ -58,14 +59,14 @@ def upload_file():
     ext = os.path.splitext(original_name)[1].lower()
     raw_extensions = [".pdf", ".doc", ".docx", ".ppt", ".pptx", ".zip", ".txt"]
     resource_type = "raw" if ext in raw_extensions else "image"
+    unique_public_id = f"{uuid.uuid4().hex}{ext}"
 
     try:
-              # 1. Cloudinary par direct upload karein
+        # 1. Cloudinary par direct upload karein
         upload_result = cloudinary.uploader.upload(
             file,
             resource_type=resource_type,
-            use_filename=True,
-            unique_filename=True
+            public_id=unique_public_id
         )
 
         # 2. Cloudinary secure public URL lein
