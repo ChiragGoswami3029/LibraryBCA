@@ -16,6 +16,11 @@ from routes.meta import meta_bp
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'pool_pre_ping': True,
+        'pool_recycle': 300,
+}
     # Cloudinary Setup
     cloudinary.config(
         cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
