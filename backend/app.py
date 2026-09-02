@@ -1,4 +1,6 @@
 import os
+import cloudinary
+import cloudinary.uploader
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
@@ -14,7 +16,13 @@ from routes.meta import meta_bp
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
-
+    # Cloudinary Setup
+    cloudinary.config(
+        cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+        api_key=os.getenv("CLOUDINARY_API_KEY"),
+        api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+        secure=True
+)
     # Make sure the uploads folder actually exists
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 

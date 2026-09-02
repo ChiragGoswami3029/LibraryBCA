@@ -1,18 +1,27 @@
 import os
+from dotenv import load_dotenv
 
 # Base folder of this project
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
+# Load environment variables from .env file
+load_dotenv(os.path.join(BASE_DIR, '.env'))
+
 class Config:
-    # SQLite database — just a single file, no server setup needed
-    SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(BASE_DIR, "database.db")
+    # Read Neon Postgres connection string from .env
+    _database_url = os.environ.get("DATABASE_URL")
+    if _database_url and _database_url.startswith("postgres://"):
+        _database_url = _database_url.replace("postgres://", "postgresql://", 1)
+
+    # Use Neon Postgres if available, otherwise fall back to local SQLite
+    SQLALCHEMY_DATABASE_URI = _database_url or ("sqlite:///" + os.path.join(BASE_DIR, "database.db"))
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Secret key used to sign login tokens (JWT). Change this before deploying!
     JWT_SECRET_KEY = "change-this-to-a-random-secret-string"
 
-    JWT_ACCESS_TOKEN_EXPIRES = False # stay logged in until you log out.
-    
+    JWT_ACCESS_TOKEN_EXPIRES = False # stay logged in until you log out
+
     # Where uploaded assignment files are physically stored
     UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
 
@@ -24,10 +33,8 @@ class Config:
     # Edit this list to match actual BCA subjects
     SUBJECTS = [
         "Digital System",
-        "Mathematics for Data Science",
-        "Design and Thinking",
-        "Multimedia Technology",
-        "Data Structure",
-    ]
-
-    SEMESTERS = ["1", "2", "3", "4", "5", "6"]
+       "Data Structures",
+       "Multimedia Technology",
+       "Mathematics for Data Science",
+       "Intellectual Property Rights",
+       "Design and Thinking",    ]
