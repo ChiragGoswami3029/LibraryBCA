@@ -17,6 +17,9 @@ class Config:
     SQLALCHEMY_DATABASE_URI = _database_url or ("sqlite:///" + os.path.join(BASE_DIR, "database.db"))
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # 👇 YAHAN IS LINE KO ADD KAREIN
+    SEMESTERS = ["1", "2", "3", "4", "5", "6"]
+
     # Secret key used to sign login tokens (JWT). Change this before deploying!
     JWT_SECRET_KEY = "change-this-to-a-random-secret-string"
 
