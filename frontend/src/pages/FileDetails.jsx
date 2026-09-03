@@ -10,7 +10,7 @@ import {
   FileText,
   FileArchive,
 } from 'lucide-react';
-import { getFiles, getViewUrl, getDownloadUrl } from '../services/filesApi';
+import { getFile } from '../services/filesApi';
 import CommentList from '../components/comments/CommentList';
 import Skeleton from '../components/common/Skeleton';
 import ErrorState from '../components/common/ErrorState';
@@ -22,12 +22,14 @@ export default function FileDetails() {
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [previewError, setPreviewError] = useState(false);
+
   const loadFileDetails = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+    setPreviewError(false);
     try {
-      const allFiles = await getFiles();
-      const match = Array.isArray(allFiles) ? allFiles.find((f) => String(f.id) === String(fileId)) : null;
+      const match = await getFile(fileId);
       if (!match) {
         throw new Error('Resource not found or has been removed.');
       }
@@ -90,8 +92,11 @@ export default function FileDetails() {
   const isDoc = ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'].includes(ext);
   const isArchive = ['zip', 'rar', '7z', 'tar'].includes(ext);
 
-  const viewUrl = getViewUrl(file.id);
-  const downloadUrl = getDownloadUrl(file.id);
+  const viewUrl = file.pdf_url;
+  // Cloudinary secure_url is directly accessible. For downloads, we can append fl_attachment to Cloudinary URLs
+  // or just link to it and use the HTML5 download attribute (though cross-origin might bypass HTML5 download).
+  // The simplest is to just use pdf_url.
+  const downloadUrl = file.pdf_url;
 
   return (
     <div style={{ maxWidth: '960px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -193,7 +198,20 @@ export default function FileDetails() {
             justifyContent: 'center',
           }}
         >
-          {isPdf ? (
+          {previewError ? (
+            <div style={{ padding: '3rem 2rem', textAlign: 'center', maxWidth: '420px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+                Preview could not be loaded
+              </h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>
+                There was an error loading the preview for this file. Please download it instead.
+              </p>
+              <a href={downloadUrl} download={file.original_name} className="btn btn-primary">
+                <Download size={16} />
+                <span>Download {file.original_name}</span>
+              </a>
+            </div>
+          ) : isPdf ? (
             <iframe
               src={viewUrl}
               title={`Preview of ${file.title}`}

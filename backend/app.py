@@ -1,4 +1,9 @@
 import os
+from dotenv import load_dotenv
+
+# Load .env file before anything else reads environment variables
+load_dotenv()
+
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
@@ -10,10 +15,13 @@ from routes.files import files_bp
 from routes.comments import comments_bp
 from routes.follow import follow_bp
 from routes.meta import meta_bp
+from extensions import limiter
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+
+    limiter.init_app(app)
 
     # Make sure the uploads folder actually exists
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)

@@ -106,7 +106,7 @@ export default function Browse() {
     if (sort && sort !== 'newest') nextParams.sort = sort;
 
     setSearchParams(nextParams, { replace: true });
-  }, [category, subject, semester, debouncedSearch, sort]);
+  }, [category, subject, semester, debouncedSearch, sort, fetchResults, setSearchParams]);
 
   const handleResetFilters = () => {
     setCategory('');

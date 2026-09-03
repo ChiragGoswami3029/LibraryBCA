@@ -25,3 +25,9 @@ export async function markNotificationRead(notificationId) {
     method: 'PATCH',
   });
 }
+
+export async function markAllNotificationsRead() {
+  return apiRequest('/notifications/mark-all-read', {
+    method: 'PATCH',
+  });
+}

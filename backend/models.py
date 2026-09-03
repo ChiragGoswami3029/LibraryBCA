@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+from datetime import datetime, timezone
 
 db = SQLAlchemy()
 
@@ -11,7 +11,7 @@ class User(db.Model):
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     # A user can upload many files, write many comments, follow many subjects
     files = db.relationship("FileItem", backref="uploader", lazy=True)
@@ -34,10 +34,11 @@ class FileItem(db.Model):
     category = db.Column(db.String(30), nullable=False)  # Notes, Assignments, Important Questions, Previous Year Papers
     subject = db.Column(db.String(100), nullable=False)
     semester = db.Column(db.String(20), nullable=False)
-    filename = db.Column(db.String(255), nullable=False)   # name of file saved on disk
+    pdf_url = db.Column(db.String(500), nullable=False)   # Cloudinary secure URL
+    cloudinary_public_id = db.Column(db.String(255), nullable=False)  # For deletion
     original_name = db.Column(db.String(255), nullable=False)  # name student sees
     uploader_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    upload_date = db.Column(db.DateTime, default=datetime.utcnow)
+    upload_date = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     comments = db.relationship("Comment", backref="file", lazy=True, cascade="all, delete-orphan")
 
@@ -50,6 +51,7 @@ class FileItem(db.Model):
             "subject": self.subject,
             "semester": self.semester,
             "original_name": self.original_name,
+            "pdf_url": self.pdf_url,
             "uploader": self.uploader.name,  # type: ignore
             "uploader_id": self.uploader_id,
             "upload_date": self.upload_date.isoformat()  ,
@@ -64,7 +66,7 @@ class Comment(db.Model):
     text = db.Column(db.String(1000), nullable=False)
     file_id = db.Column(db.Integer, db.ForeignKey("files.id"), nullable=False)
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     def to_dict(self):
         return {
@@ -96,7 +98,7 @@ class Notification(db.Model):
     file_id = db.Column(db.Integer, db.ForeignKey("files.id"), nullable=False)
     message = db.Column(db.String(255), nullable=False)
     is_read = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     def to_dict(self):
         return {

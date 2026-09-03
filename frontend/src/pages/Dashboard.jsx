@@ -44,7 +44,7 @@ export default function Dashboard() {
     navigate('/app/browse');
   };
 
-  const displayName = isAuthenticated && user?.name ? user.name : 'Chik';
+  const displayName = isAuthenticated && user?.name ? user.name : 'Student';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>

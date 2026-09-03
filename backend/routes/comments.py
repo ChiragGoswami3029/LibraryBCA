@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import db, Comment, FileItem
+from extensions import limiter
 
 comments_bp = Blueprint("comments", __name__)
 
@@ -14,6 +15,7 @@ def list_comments(file_id):
 
 @comments_bp.route("/files/<int:file_id>/comments", methods=["POST"])
 @jwt_required()
+@limiter.limit("30 per hour")
 def add_comment(file_id):
     FileItem.query.get_or_404(file_id)
     user_id = int(get_jwt_identity())

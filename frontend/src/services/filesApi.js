@@ -12,6 +12,10 @@ export async function getFiles({ category = '', subject = '', semester = '', q =
   return apiRequest(`/files${queryStr}`);
 }
 
+export async function getFile(fileId) {
+  return apiRequest(`/files/${fileId}`);
+}
+
 export async function getMyFiles() {
   return apiRequest('/my-files');
 }
@@ -36,10 +40,4 @@ export async function deleteFile(fileId) {
   });
 }
 
-export function getViewUrl(fileId) {
-  return `${getApiBaseUrl()}/files/${fileId}/view`;
-}
 
-export function getDownloadUrl(fileId) {
-  return `${getApiBaseUrl()}/files/${fileId}/download`;
-}

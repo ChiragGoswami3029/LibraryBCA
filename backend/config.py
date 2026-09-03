@@ -1,20 +1,27 @@
 import os
+from datetime import timedelta
 
 # Base folder of this project
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
-    # SQLite database — just a single file, no server setup needed
-    SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(BASE_DIR, "database.db")
+    # Read the database URL from the environment (e.g. Neon PostgreSQL)
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
+    if not SQLALCHEMY_DATABASE_URI:
+        raise RuntimeError("DATABASE_URL environment variable is required.")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # Secret key used to sign login tokens (JWT). Change this before deploying!
-    JWT_SECRET_KEY = "change-this-to-a-random-secret-string"
+    # Secret key used to sign login tokens (JWT) — loaded from environment
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+    if not JWT_SECRET_KEY:
+        raise RuntimeError("JWT_SECRET_KEY environment variable is required. Set it in backend/.env")
 
-    JWT_ACCESS_TOKEN_EXPIRES = False # stay logged in until you log out.
-    
-    # Where uploaded assignment files are physically stored
-    UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
+    # Tokens expire after 24 hours — users must re-login after that
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)
+
+    # Max upload size: 50 MB
+    MAX_CONTENT_LENGTH = 50 * 1024 * 1024
+
 
     # Only these file types can be uploaded (safety)
     ALLOWED_EXTENSIONS = {"pdf", "doc", "docx", "ppt", "pptx", "png", "jpg", "jpeg", "zip", "txt"}

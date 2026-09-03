@@ -1,10 +1,12 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from models import db, User
+from extensions import limiter
 
 auth_bp = Blueprint("auth", __name__)
 
 @auth_bp.route("/register", methods=["POST"])
+@limiter.limit("5 per minute")
 def register():
     data = request.get_json()
     name = (data.get("name") or "").strip()
@@ -13,6 +15,9 @@ def register():
 
     if not name or not email or not password:
         return jsonify({"error": "name, email and password are required"}), 400
+
+    if len(password) < 6:
+        return jsonify({"error": "Password must be at least 6 characters"}), 400
 
     if User.query.filter_by(email=email).first():
         return jsonify({"error": "Email already registered"}), 409
@@ -26,6 +31,7 @@ def register():
 
 
 @auth_bp.route("/login", methods=["POST"])
+@limiter.limit("10 per minute")
 def login():
     data = request.get_json()
     email = ((data.get("email") or "").strip()).lower()

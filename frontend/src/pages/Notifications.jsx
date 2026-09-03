@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, CheckCircle2, Clock, FileText, ArrowRight, CheckCheck } from 'lucide-react';
-import { getNotifications, markNotificationRead } from '../services/followApi';
+import { getNotifications, markNotificationRead, markAllNotificationsRead } from '../services/followApi';
 import Button from '../components/common/Button';
 import Skeleton from '../components/common/Skeleton';
 import EmptyState from '../components/common/EmptyState';
@@ -68,7 +68,7 @@ export default function Notifications() {
 
     setIsMarkingAll(true);
     try {
-      await Promise.all(unread.map((n) => markNotificationRead(n.id)));
+      await markAllNotificationsRead();
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
     } catch {
       // Re-fetch to be accurate
